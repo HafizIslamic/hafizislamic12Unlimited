@@ -39,17 +39,16 @@ jobs:
           $password = -join ($pw | Get-Random -Count $pw.Count)
 
           $secure = ConvertTo-SecureString $password -AsPlainText -Force
-          New-LocalUser "RDP" -Password $secure -AccountNeverExpires
-          Add-LocalGroupMember Administrators RDP
-          Add-LocalGroupMember "Remote Desktop Users" RDP
+          New-LocalUser "B2H" -Password $secure -AccountNeverExpires
+          Add-LocalGroupMember Administrators B2H
+          Add-LocalGroupMember "Remote Desktop Users" B2H
 
           echo "RDP_PASSWORD=$password" >> $env:GITHUB_ENV
 
       - name: Install Tailscale
         shell: pwsh
         run: |
-          $url = "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi"
-          Invoke-WebRequest -Uri $url -OutFile tailscale.msi
+          Invoke-WebRequest https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi -OutFile tailscale.msi
           Start-Process msiexec.exe -ArgumentList "/i tailscale.msi /quiet /norestart" -Wait
 
       - name: Start Tailscale
@@ -65,17 +64,17 @@ jobs:
       - name: RDP Info
         shell: pwsh
         run: |
+          $startTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
           Write-Host "=========================="
           Write-Host "RDP READY"
+          Write-Host "Started At: $startTime"
           Write-Host "IP: $env:TS_IP"
-          Write-Host "User: RDP"
+          Write-Host "User: B2H"
           Write-Host "Password: $env:RDP_PASSWORD"
           Write-Host "=========================="
 
-      - name: Keep Runner Alive
+      - name: Keep Runner Alive (360 minutes)
         shell: pwsh
         run: |
-          Write-Host "Keeping runner alive..."
-          while ($true) {
-            Start-Sleep -Seconds 300
-          }
+          Write-Host "Runner will stay alive for 360 minutes..."
+          Start-Sleep -Seconds 21600
